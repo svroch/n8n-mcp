@@ -1,61 +1,30 @@
-# docker-compose.yml
-# For optimized builds with BuildKit, use: docker-compose -f docker-compose.buildkit.yml up
-version: '3.8'
-
+version: "3.9"
 services:
-  n8n-mcp:
-    image: ghcr.io/czlonkowski/n8n-mcp:latest
-    container_name: n8n-mcp
-    restart: unless-stopped
-    
-    # Environment configuration
+  n8n-mcp:                                  # gleicher Name, damit Coolify die Ressource 1:1 ersetzt
+    image: ghcr.io/open-webui/mcpo:main
+    command: >
+      --port 8080
+      --api-key ${MCPO_API_KEY}
+      -- npx n8n-mcp
     environment:
-      # Mode configuration
-      # MCP_MODE: ${MCP_MODE:-http}
-      # USE_FIXED_HTTP: ${USE_FIXED_HTTP:-true}  # Use fixed implementation for stability
-      # AUTH_TOKEN: ${AUTH_TOKEN:?AUTH_TOKEN is required for HTTP mode}
-      
-      # Application settings
-      NODE_ENV: ${NODE_ENV:-production}
-      LOG_LEVEL: ${LOG_LEVEL:-info}
-      PORT: ${PORT:-3000}
-      
-      # Database
-      NODE_DB_PATH: ${NODE_DB_PATH:-/app/data/nodes.db}
-      REBUILD_ON_START: ${REBUILD_ON_START:-false}
-      
-      # Optional: n8n API configuration (enables 16 additional management tools)
-      # Uncomment and configure to enable n8n workflow management
-      # N8N_API_URL: ${N8N_API_URL}
-      # N8N_API_KEY: ${N8N_API_KEY}
-      # N8N_API_TIMEOUT: ${N8N_API_TIMEOUT:-30000}
-      # N8N_API_MAX_RETRIES: ${N8N_API_MAX_RETRIES:-3}
-    
-    # Volumes for persistence
-    volumes:
-      - n8n-mcp-data:/app/data
-    
-    # Port mapping
+      MCP_MODE: stdio
+      LOG_LEVEL: error
+      DISABLE_CONSOLE_OUTPUT: "true"
+      N8N_API_URL: ${N8N_API_URL}
+      N8N_API_KEY: ${N8N_API_KEY}
     ports:
-      - "${PORT:-3000}:3000"
-    
-    # Resource limits
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-        reservations:
-          memory: 256M
-    
-    # Health check
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://127.0.0.1:3000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      - "8080:8080"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.mcp.rule=Host(`mcp-n8n-doc.srai.ch`)
+      - traefik.http.routers.mcp.entrypoints=websecure
+      - traefik.http.routers.mcp.tls=true
+      - traefik.http.services.mcp.loadbalancer.server.port=8080
+      - traefik.docker.network=coolify
+    networks:
+      - coolify
+    restart: unless-stopped
 
-# Named volume for data persistence
-volumes:
-  n8n-mcp-data:
-    driver: local
+networks:
+  coolify:
+    external: true
