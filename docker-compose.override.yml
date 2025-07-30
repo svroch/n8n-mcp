@@ -1,6 +1,6 @@
 version: "3.9"
 services:
-  n8n-mcp:                   
+  n8n-mcp:                           # ➊  exakt derselbe Dienst-Name wie im Basis-Compose
     image: ghcr.io/open-webui/mcpo:main
     command: >
       --port 8080
@@ -14,5 +14,16 @@ services:
       N8N_API_KEY: ${N8N_API_KEY}
     ports:
       - "8080:8080"
+    labels:                          # ➋  hier sagst du Traefik, was es tun soll
+      - traefik.enable=true
+      - traefik.http.routers.mcp.rule=Host(`mcp-n8n-doc.srai.ch`)
+      - traefik.http.routers.mcp.entrypoints=websecure
+      - traefik.http.routers.mcp.tls=true
+      - traefik.http.services.mcp.loadbalancer.server.port=8080
+    networks:                        # ➌  der Container muss im coolify-Netz hängen
+      - coolify
     restart: unless-stopped
 
+networks:
+  coolify:
+    external: true                   # ➍  Coolify legt dieses Netz schon an
