@@ -12,8 +12,6 @@ services:
       DISABLE_CONSOLE_OUTPUT: "true"
       N8N_API_URL: ${N8N_API_URL}
       N8N_API_KEY: ${N8N_API_KEY}
-    ports:
-      - "8080:8080"
     labels:
       - traefik.enable=true
       - traefik.http.routers.mcp.rule=Host(`mcp-n8n-doc.srai.ch`)
