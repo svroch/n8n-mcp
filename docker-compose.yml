@@ -1,14 +1,15 @@
 version: "3.9"
+
 services:
-  mcpo:                                   # you may keep the old n8n-mcp name; 'mcpo' is fine too
+  mcpo:
     image: ghcr.io/open-webui/mcpo:main
     command: --port 8080 --api-key ${MCPO_API_KEY} -- npx n8n-mcp
     environment:
       MCP_MODE: stdio
       LOG_LEVEL: error
-    networks: [coolify]                   # <-- only internal network, no ports: section needed
+    networks: [coolify]        # ⇦ no ports: section
     restart: unless-stopped
+
 networks:
   coolify:
     external: true
-
