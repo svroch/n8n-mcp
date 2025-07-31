@@ -15,8 +15,6 @@ services:
 
   mcpo:
     image: ghcr.io/open-webui/mcpo:latest
-    ports:
-      - "8080"  # This will let Docker assign a random host port
     environment:
       - MCPO_API_KEY=${MCPO_API_KEY}
       - MCP_SERVERS=[{"id":"n8n","name":"n8n-mcp","command":"node","args":["npm","start"],"env":{"N8N_URL":"${N8N_URL}","N8N_API_KEY":"${N8N_API_KEY}"},"cwd":"/app","host":"n8n-mcp"}]
@@ -24,8 +22,6 @@ services:
       - n8n-mcp
     networks:
       - coolify
-    labels:
-      - "traefik.http.services.mcpo.loadbalancer.server.port=8080"
     restart: unless-stopped
 
 networks:
