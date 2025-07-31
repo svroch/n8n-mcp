@@ -1,27 +1,35 @@
-version: '3.8'
+version: "3.9"
 
 services:
   n8n-mcp:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
     environment:
-      - NODE_ENV=production
-      - N8N_URL=${N8N_URL}
-      - N8N_API_KEY=${N8N_API_KEY}
-    networks:
-      - coolify
+      NODE_ENV: production
+      N8N_URL: ${N8N_URL}
+      N8N_API_KEY: ${N8N_API_KEY}
+    networks: [coolify]
     restart: unless-stopped
 
   mcpo:
     image: ghcr.io/open-webui/mcpo:latest
+    command: --port 8080 --api-key ${MCPO_API_KEY} -- npx n8n-mcp
     environment:
-      - MCPO_API_KEY=${MCPO_API_KEY}
-      - MCP_SERVERS=[{"id":"n8n","name":"n8n-mcp","command":"node","args":["npm","start"],"env":{"N8N_URL":"${N8N_URL}","N8N_API_KEY":"${N8N_API_KEY}"},"cwd":"/app","host":"n8n-mcp"}]
-    depends_on:
-      - n8n-mcp
-    networks:
-      - coolify
+      MCP_MODE: stdio
+      MCP_SERVERS: >-
+        [{"id":"n8n","name":"n8n-mcp","command":"node","args":["npm","start"],
+          "env":{"N8N_URL":"${N8N_URL}","N8N_API_KEY":"${N8N_API_KEY}"},
+          "cwd":"/app","host":"n8n-mcp"}]
+    depends_on: [n8n-mcp]
+    networks: [coolify]
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.mcpo.rule: Host(`mcp-n8n-doc.srai.ch`)
+      traefik.http.routers.mcpo.entrypoints: https     # Coolify v4 = http/https
+      traefik.http.routers.mcpo.tls: "true"
+      traefik.http.services.mcpo.loadbalancer.server.port: "8080"
+      traefik.docker.network: coolify
     restart: unless-stopped
 
 networks:
