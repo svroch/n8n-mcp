@@ -24,12 +24,12 @@ services:
     depends_on: [n8n-mcp]
     networks: [coolify]
     labels:
-      traefik.enable: "true"
-      traefik.http.routers.mcpo.rule: Host(`mcp-n8n-doc.srai.ch`)
-      traefik.http.routers.mcpo.entrypoints: https     # Coolify v4 = http/https
-      traefik.http.routers.mcpo.tls: "true"
-      traefik.http.services.mcpo.loadbalancer.server.port: "8080"
-      traefik.docker.network: coolify
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.mcpo.rule=Host(`mcp-n8n-doc.srai.ch`)'
+      - 'traefik.http.routers.mcpo.entrypoints=https'     # Coolify v4 uses http/https
+      - 'traefik.http.routers.mcpo.tls=true'
+      - 'traefik.http.services.mcpo.loadbalancer.server.port=8080'
+      - 'traefik.docker.network=coolify'
     restart: unless-stopped
 
 networks:
