@@ -14,15 +14,10 @@ services:
       N8N_API_KEY: ${N8N_API_KEY}
     labels:
       - traefik.enable=true
-      # Router-Regel nur Host(), KEIN PathPrefix
       - traefik.http.routers.mcp.rule=Host(`mcp-n8n-doc.srai.ch`)
-      # Richtiger Entrypoint-Name in Coolify v4
-      - traefik.http.routers.mcp.entrypoints=https
-      # TLS aktivieren (Coolify setzt automatisch den letsencrypt-Resolver)
+      - traefik.http.routers.mcp.entrypoints=https      # Coolify v4 hat http/https
       - traefik.http.routers.mcp.tls=true
-      # Dienst-Port bleibt 8080 im Container
       - traefik.http.services.mcp.loadbalancer.server.port=8080
-      # Unbedingt genau das Docker-Netz, in dem Traefik steckt
       - traefik.docker.network=coolify
     networks:
       - coolify
