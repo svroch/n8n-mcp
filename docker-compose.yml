@@ -1,13 +1,35 @@
-version: "3.9"
+version: '3.8'
 
 services:
-  mcpo:
-    image: ghcr.io/open-webui/mcpo:main
-    command: --port 8080 --api-key ${MCPO_API_KEY} -- npx n8n-mcp
+  n8n-mcp:
+    build: 
+      context: .
+      dockerfile: Dockerfile
     environment:
-      MCP_MODE: stdio
-      LOG_LEVEL: error
-    networks: [coolify]        # ⇦ no ports: section
+      - NODE_ENV=production
+    volumes:
+      - ./dist:/app/dist
+    networks:
+      - coolify
+    restart: unless-stopped
+
+  mcpo:
+    image: ghcr.io/open-webui/mcpo:latest
+    environment:
+      - MCP_SERVERS=[{"id":"n8n","name":"n8n-mcp","command":"node","args":["/app/dist/index.js"],"env":{},"cwd":"/app"}]
+    volumes:
+      - ./dist:/app/dist:ro
+    depends_on:
+      - n8n-mcp
+    networks:
+      - coolify
+    labels:
+      - "coolify.managed=true"
+      - "coolify.type=application"
+      - "coolify.name=mcpo-n8n"
+      - "coolify.domain=mcp-n8n-doc.srai.ch"
+      - "coolify.port=8080"
+      - "coolify.generateSSL=true"
     restart: unless-stopped
 
 networks:
