@@ -1,28 +1,14 @@
 version: "3.9"
 services:
-  n8n-mcp:                                  # gleicher Name, damit Coolify die Ressource 1:1 ersetzt
+  mcpo:                                   # you may keep the old n8n-mcp name; 'mcpo' is fine too
     image: ghcr.io/open-webui/mcpo:main
-    command: >
-      --port 8080
-      --api-key ${MCPO_API_KEY}
-      -- npx n8n-mcp
+    command: --port 8080 --api-key ${MCPO_API_KEY} -- npx n8n-mcp
     environment:
       MCP_MODE: stdio
       LOG_LEVEL: error
-      DISABLE_CONSOLE_OUTPUT: "true"
-      N8N_API_URL: ${N8N_API_URL}
-      N8N_API_KEY: ${N8N_API_KEY}
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.mcp.rule=Host(`mcp-n8n-doc.srai.ch`)
-      - traefik.http.routers.mcp.entrypoints=https      # Coolify v4 hat http/https
-      - traefik.http.routers.mcp.tls=true
-      - traefik.http.services.mcp.loadbalancer.server.port=8080
-      - traefik.docker.network=coolify
-    networks:
-      - coolify
+    networks: [coolify]                   # <-- only internal network, no ports: section needed
     restart: unless-stopped
-
 networks:
   coolify:
     external: true
+
